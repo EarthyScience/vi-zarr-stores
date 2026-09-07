@@ -200,7 +200,8 @@ const MetaStatusBadges: React.FC<{
   availableDims: DimOption[];
   cacheSize: number;
   setCacheSize: React.Dispatch<React.SetStateAction<number>>;
-}> = React.memo(({ meta, availableDims, cacheSize, setCacheSize }) => {
+  setDataSize: React.Dispatch<React.SetStateAction<number>>;
+}> = React.memo(({ meta, availableDims, cacheSize, setCacheSize, setDataSize }) => {
   const {rows, collapsedSels} = useMetaSelectorStore((s) => s);
 
   const {initStore, idx4D} = useGlobalStore((s) => s);
@@ -248,7 +249,9 @@ const MetaStatusBadges: React.FC<{
   const texCount = sizeData.texCount;
   const tooBig = texCount > 12;
   const cachedSize = useMemo(() => {
-    return currentSize * 2/dtype;
+    const cachedSize = currentSize * 2/dtype;
+    setDataSize(cachedSize);
+    return cachedSize;
   }, [currentSize, meta]);
 
   const smallCache = cachedSize > cacheSize;
@@ -349,11 +352,11 @@ const MetaStatusBadges: React.FC<{
               <div className="flex items-center gap-4 w-full min-w-0">
                 <SliderThumbs
                   id="newCache-size"
-                  min={0}
-                  max={1000}
+                  min={200}
+                  max={1200}
                   value={[cacheSize / (1024 * 1024)]}
                   step={10}
-                  onValueChange={(e) => setCacheSize(maxSize + e[0] * (1024 * 1024))}
+                  onValueChange={(e) => setCacheSize(e[0] * (1024 * 1024))}
                   className="flex-1 min-w-0"
                 />
                 <div className="flex items-center gap-1 shrink-0">
@@ -598,10 +601,10 @@ export default function MetaDimSelector({ meta, metadata, onApply }: Props) {
 	const { ndSlices, axisMapping, ReFetch, compress, setCompress, coarsen, setCoarsen, kernelSize, setKernelSize, kernelDepth, setKernelDepth } = useZarrStore(
     useShallow(s => s))
 	const [cacheSize, setCacheSize] = useState(maxSize);
-
+  const [dataSize, setDataSize] = useState(maxSize)
 	const [displaySpat, setDisplaySpat] = useState(String(kernelSize));
 	const [displayDepth, setDisplayDepth] = useState(String(kernelDepth));
-
+  const smallCache = dataSize > cacheSize;
 	const availableDims: DimOption[] = useMemo(
 		() =>
 		dimArrays.map((values, idx) => {
@@ -829,6 +832,7 @@ export default function MetaDimSelector({ meta, metadata, onApply }: Props) {
 
               <div className="flex items-center justify-end ml-auto min-w-0">
                 <Button
+                  disabled={smallCache}
                   variant={'pink'}
                   className="cursor-pointer hover:scale-[1.05] shadow-sm h-8 px-4"
                   onClick={handlePlot}
@@ -843,6 +847,7 @@ export default function MetaDimSelector({ meta, metadata, onApply }: Props) {
               availableDims={availableDims}
               cacheSize={cacheSize}
               setCacheSize={setCacheSize}
+              setDataSize={setDataSize}
             />
           </div>
 

@@ -81,6 +81,7 @@ export const UVCube = ( {scale} : {scale?:THREE.Vector3} )=>{
 	
   function HandleTimeSeries(event: THREE.Intersection){
     const uv = event.uv!;
+    const timeUV = new THREE.Vector2().copy(uv); // Need this to flipY if necessary
     const normal = event.normal!;
     let newUV: THREE.Vector2 | undefined;
     if (remapTexture){ // Get new UV if reprojected and along z Axis
@@ -104,9 +105,11 @@ export const UVCube = ( {scale} : {scale?:THREE.Vector3} )=>{
       setDimCoords({});
     }
     lastNormal.current = dimAxis;
+    const coordUV = parseUVCoords({normal:normal,uv})
+    timeUV.y = flipY ? 1 - uv.y : uv.y;
     const tempTS = GetTimeSeries(
       { data: analysisMode ? analysisArray : GetCurrentArray(), shape: dataShape, stride: strides },
-      { uv: newUV ?? uv, normal }
+      { uv: newUV ?? timeUV, normal }
     )
     const plotDim = (normal.toArray()).map((val, idx) => {
       if (Math.abs(val) > 0) {
@@ -114,7 +117,7 @@ export const UVCube = ( {scale} : {scale?:THREE.Vector3} )=>{
       }
       return null;}).filter(idx => idx !== null);
     setPlotDim(2-plotDim[0]) //I think this 2 is only if there are 3-dims. Need to rework the logic
-    const coordUV = parseUVCoords({normal:normal,uv})
+    
     let dimCoords = coordUV.map((val,idx)=>val ? allAxis[idx][Math.round(val*allAxis[idx].length)] : null)
     const thisDimNames = axisDimNames.filter((_,idx)=> dimCoords[idx] !== null)
     const thisDimUnits = axisDimUnits.filter((_,idx)=> dimCoords[idx] !== null)

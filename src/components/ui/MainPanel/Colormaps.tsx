@@ -103,12 +103,7 @@ const Colormaps = () => {
 
   let cmapTimeout: NodeJS.Timeout | undefined;
 
-  const updateColormap = (cmap: string) => {
-    if (cmapTimeout){
-      clearTimeout(cmapTimeout);
-      cmapTimeout = undefined;
-    }
-    setColormap(
+  const setCmap = (cmap: string) => setColormap(
       GetColorMapTexture(
         previousTextureRef.current,
         cmap === "Default" ? "Spectral" : cmap,
@@ -117,15 +112,19 @@ const Colormaps = () => {
         0,
         flipColormapRef.current
       )
-    );
+    )
+
+  const updateColormap = (cmap: string) => {
+    if (cmapTimeout){
+      clearTimeout(cmapTimeout);
+      cmapTimeout = undefined;
+    }
+    setCmap(cmap);
   }
 
   const restoreColormap = () => {
     cmapTimeout = setTimeout(()=>{
-      setColormap(
-      GetColorMapTexture(
-        previousTextureRef.current,
-        colormapName))
+      setCmap(colormapName);
     }, 100)
   }
 
