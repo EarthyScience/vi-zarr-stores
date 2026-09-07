@@ -160,6 +160,7 @@ export const ColumnMeshes = () => {
 	const {xIdx, yIdx, zIdx} = useAxisIndices()
 	const meshes: THREE.Mesh[] = useMemo(()=>{
 		const meshes: THREE.Mesh[] = []
+		const originalXSteps = dataShape[xIdx]; // Need this because it messes up the depthScale after repro
 		const xSteps = remapTexture 
 						? remapTexture.image.width 
 						: dataShape[xIdx];
@@ -168,7 +169,7 @@ export const ColumnMeshes = () => {
 						: dataShape[yIdx];
 		const zSteps = dataShape[zIdx];
 		const aspectRatio = ySteps/xSteps; // This is not aspect ratio
-		const depthRatio = zSteps/xSteps;
+		const depthRatio = zSteps/originalXSteps;
 		for (const [_tsID, tsObj] of Object.entries(timeSeries)){
 			const {normal, uv, color} = tsObj
 			const position = normalToPos(uv, normal, {aspectRatio,depthRatio}, {xSteps, ySteps, zSteps})
