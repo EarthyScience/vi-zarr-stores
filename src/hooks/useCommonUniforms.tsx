@@ -5,7 +5,6 @@ import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { useShallow } from 'zustand/shallow'
 import { useCoordBounds } from './useCoordBounds'
-import { deg2rad } from '@/utils/HelperFuncs'
 
 export function useCommonUniforms() {
 	const {cScale, cOffset, animProg, nanTransparency, nanColor, fillValue, maskTexture, maskValue, valueRange, 
@@ -48,7 +47,6 @@ export function updateCommonUniforms(material: THREE.ShaderMaterial){
 		useBorderTexture, borderColor, borderWidth, is360Deg, showBorders} = usePlotStore(useShallow(s=>s))
 	const {textureArrayDepths, colormap, valueScales, useF16Textures} = useGlobalStore(useShallow(s => s))
 	const {lonBounds, latBounds} = useCoordBounds()
-
 	useEffect(()=>{
 		// Cleanup function to dispose materials when they are remade in parent component
 		if (material){

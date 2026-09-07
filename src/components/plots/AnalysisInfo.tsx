@@ -28,8 +28,8 @@ const AnalysisInfo = ({loc, show, info, } : {loc: number[], show: boolean, info:
         return {plotNames, plotUnits, plotArrays}
     },[axisDimNames, axisDimUnits, axisDimArrays, axis]) 
     const {plotNames, plotUnits} = plotInfo;
-    const yCoord = yArray[Math.floor(info[0] * yArray.length)]
-    const xCoord = xArray[Math.floor(info[1] * xArray.length)]
+    const yCoord = yArray[Math.floor(info[0] * yArray?.length)]
+    const xCoord = xArray[Math.floor(info[1] * xArray?.length)]
 
   return (
     <div className='analysis-overlay'

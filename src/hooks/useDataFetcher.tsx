@@ -47,8 +47,6 @@ export const useDataFetcher = () => {
                 }
                 //----- TimeSeries Cleanup ----//
                 useGlobalStore.setState({timeSeries:{}, dimCoords:{}})
-                //---- Set Plot Slicez ----//
-
                 //---- Main Fetch ----//
                 GetArray().then((result) => {
                     setDataShape(result.shape);
@@ -60,11 +58,9 @@ export const useDataFetcher = () => {
                         data: result.data,
                         shape
                     });
-
                     setTextures(tempTexture);
                     setValueScales(scaling as { maxVal: number; minVal: number });
                     useGlobalStore.setState({scalingFactor: result.scalingFactor});
-
                     const shapeLength = shape.length;
                     if (shapeLength === 2) {
                         setIsFlat(true);
@@ -77,60 +73,56 @@ export const useDataFetcher = () => {
                     const aspectRatio = shape[shapeLength - 2] / shape[shapeLength - 1];
                     const timeRatio = shape[shapeLength - 3] / shape[shapeLength - 1];
                     setShape(new THREE.Vector3(2, aspectRatio * 2, Math.max(timeRatio, 2)));
-                    
+                }).then(()=>{
+                    //---- Metadata ----//
+                    GetAttributes().then((result) => {
+                        setMetadata(result);
+                        setStableMetadata(result);
+                    });
+
+                    //---- DimInfo ----//
+                    GetDimInfo(variable).then((arrays) => {
+                        let { dimArrays, dimUnits, dimNames } = arrays;
+                        useGlobalStore.setState({dimArrays, dimNames, dimUnits, 
+                            axisDimArrays: dimArrays, axisDimNames: dimNames, axisDimUnits: dimUnits});
+                        const { axisMapping } = useZarrStore.getState();
+                        const yIdx = (axisMapping.y >= 0 && axisMapping.y < dimArrays.length) ? axisMapping.y : Math.max(0, dimArrays.length - 2);
+                        const targetDim = dimArrays[yIdx] || dimArrays[0];
+                        const shouldFlip = (targetDim && targetDim.length >= 2) ? targetDim[1] < targetDim[0] : false;
+                        setFlipY(shouldFlip);   
+                        parseExtent();  
+                        if(preProject)reproject();
+                        else handleIrregularGrid();           
+                    });
+                    setShow(true);
                     setPlotOn(true);
                     setStatus(null);
-                }).then(()=>{
-                    if(preProject)reproject();
-                    else handleIrregularGrid();
-                    setShow(true)
                 })
             } catch (error) {
-                console.error(error);
                 setStatus(null);
                 return;
             }
-
-            //---- Metadata ----//
-            GetAttributes().then((result) => {
-                setMetadata(result);
-                setStableMetadata(result);
-            });
-
-            //---- DimInfo ----//
-            GetDimInfo(variable).then((arrays) => {
-                let { dimArrays, dimUnits, dimNames } = arrays;
-                useGlobalStore.setState({dimArrays, dimNames, dimUnits, 
-                    axisDimArrays: dimArrays, axisDimNames: dimNames, axisDimUnits: dimUnits});
-                
-                const { axisMapping } = useZarrStore.getState();
-                const yIdx = (axisMapping.y >= 0 && axisMapping.y < dimArrays.length) ? axisMapping.y : Math.max(0, dimArrays.length - 2);
-                const targetDim = dimArrays[yIdx] || dimArrays[0];
-                const shouldFlip = (targetDim && targetDim.length >= 2) ? targetDim[1] < targetDim[0] : false;
-                setFlipY(shouldFlip);   
-                parseExtent();             
-            });
-
         } else {
             setMetadata(null);
         }
     }, [reFetch]); 
 
+    // ---- InterpPixels ---- //
     useEffect(()=> {
-    if (!textures) return;
-    const updated = textures.map(tex => {
-      const clone = tex.clone(); 
-      if (interpPixels) {
-        clone.minFilter = THREE.LinearFilter;
-        clone.magFilter = THREE.LinearFilter;
-      } else {
-        clone.minFilter = THREE.NearestFilter;
-        clone.magFilter = THREE.NearestFilter;
-      }
-      clone.needsUpdate = true; 
-      return clone ;
-    });
-    setTextures(updated as THREE.Data3DTexture[] | THREE.DataTexture[]);
+        if (!textures) return;
+        const updated = textures.map(tex => {
+        const clone = tex.clone(); 
+        if (interpPixels) {
+            clone.minFilter = THREE.LinearFilter;
+            clone.magFilter = THREE.LinearFilter;
+        } else {
+            clone.minFilter = THREE.NearestFilter;
+            clone.magFilter = THREE.NearestFilter;
+        }
+        clone.needsUpdate = true; 
+        return clone ;
+        });
+        setTextures(updated as THREE.Data3DTexture[] | THREE.DataTexture[]);
   },[interpPixels])
 
   useEffect(() => {

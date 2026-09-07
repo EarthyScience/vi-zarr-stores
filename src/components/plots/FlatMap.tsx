@@ -74,7 +74,6 @@ const FlatMap = ({textures: propTextures, infoSetters} : {textures : THREE.DataT
     const handleMove = (e: ThreeEvent<PointerEvent>) => {
       if (infoRef.current && e.uv) {
         let {uv} = e;
-        console.log(uv)
         if (!uv) return;
         setLoc([e.clientX, e.clientY]);
         if (remapTexture){
@@ -89,7 +88,7 @@ const FlatMap = ({textures: propTextures, infoSetters} : {textures : THREE.DataT
         const { x, y } = uv;
         const xSize = xArray.length;
         const ySize = yArray.length;
-        const xId = Math.round(x * xSize - 0.5);
+        const xId = Math.floor(x * xSize);
         const yId = Math.floor(y * ySize);
         let dataIdx = xSize * yId + xId;
         const zOffset = isFlat ? 0 : Math.floor((zArray.length-1) * animProg)
