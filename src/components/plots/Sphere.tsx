@@ -32,7 +32,6 @@ export const Sphere = ({textures: propTextures} : {textures: THREE.Data3DTexture
       getColorIdx, incrementColorIdx} = usePlotStore(useShallow(s => s))
     const {xArray, yArray, zArray} = useDimAxis();
     const dimSlices = [zArray, yArray, xArray];
-    const {lonBounds, latBounds} = useCoordBounds()
     const geometry = useMemo(() => new THREE.IcosahedronGeometry(1, sphereResolution), [sphereResolution]);
     const uniforms = useCommonUniforms()
     const shaderMaterial = useMemo(()=>{
@@ -83,7 +82,7 @@ export const Sphere = ({textures: propTextures} : {textures: THREE.Data3DTexture
       }
     },[textures, displacement, fillValue, valueScales])
     
-    
+    const {lonBounds, latBounds} = useCoordBounds()
     function HandleTimeSeries(event: THREE.Intersection){
         const point = event.point.normalize();
 
