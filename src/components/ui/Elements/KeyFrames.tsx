@@ -1,13 +1,13 @@
 "use client";
 import React, {useEffect, useRef, useState } from 'react'
-import { Button } from './button'
+import { Button } from '../button'
 import { ButtonGroup } from "@/components/ui/button-group"
 import { useImageExportStore } from '@/GlobalStates/ImageExportStore';
 import { usePlotStore } from '@/GlobalStates/PlotStore';
 import { useShallow } from 'zustand/shallow'
-import { Slider } from './slider'
-import './css/KeyFrames.css'
-import { Input } from './input';
+import { Slider } from '../slider'
+import '../css/KeyFrames.css'
+import { Input } from '../input';
 import { IoCloseCircleSharp } from "react-icons/io5";
 import { FaPlusCircle } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
@@ -16,8 +16,9 @@ import { TbKeyframeFilled } from "react-icons/tb";
 import { TbKeyframesFilled } from "react-icons/tb";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner"
-import { QuickTip } from './Widgets/QuickTip';
-import { KeyFramesHelper } from './Elements/KeyFramesHelper';
+import { QuickTip } from '../Widgets/QuickTip';
+import { KeyFramesHelper } from './KeyFramesHelper';
+import { KeyFrameInfo } from './KeyFrameInfo';
 import { BsBoxArrowUp } from 'react-icons/bs';
 function pick<T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
   return keys.reduce((acc, key) => {
@@ -151,7 +152,7 @@ export const KeyFrames = () => {
                 onClick={()=>setShowHelper(true)}
             >
                 <BsBoxArrowUp />
-                Guide
+                { MdLg === "lg" ? 'Guide' : '?'}
             </Button>
 			{/* Buttons */}
 			<ButtonGroup>
@@ -191,25 +192,26 @@ export const KeyFrames = () => {
 			{/* Frame Information */}
             <ButtonGroup >
                 <QuickTip message='Set number of frames in animation (defaults to number of timesteps)' side='top'>
-                    <Button size="sm" variant="outline">
-                        <TbKeyframesFilled/> { MdLg === "lg" ? 'Frames' : ''}
+                    <Button size="sm" variant="decorator">
+                        Frames
                     </Button>
                 </QuickTip>
-                <Input className='w-[80px] h-[32px]' id="frames" type='number' step={1} value={frames} onChange={e => setFrames(Math.max(parseInt(e.target.value),2))} />
+                <Input className='w-[60px] h-[32px] no-spinner' id="frames" type='number' step={1} value={frames} onChange={e => setFrames(Math.max(parseInt(e.target.value),2))} />
             </ButtonGroup>
             <ButtonGroup >
                 <QuickTip message='Curent Frame' side='top'>
-                    <Button size="sm" variant="outline">
-                        <TbKeyframeFilled/> { MdLg === "lg" ? 'Frame' : ''}
+                    <Button size="sm" variant="decorator">
+                        Frame
                     </Button>
                 </QuickTip>
                 <Input value={currentFrame} type='number' 
-                    className='w-[80px] h-[32px]'
+                    className='w-[60px] h-[32px] no-spinner'
                     min={1} 
                     step={1} 
                     onChange={e =>parseInt(e.target.value) ? setCurrentFrame(Math.max(parseInt(e.target.value), 1)) : 1}
                 />
             </ButtonGroup>
+            {/* <KeyFrameInfo keyframe={currentFrame} keyframesMap={keyFrames} /> */}
 		</div>
         <div className="relative w-full my-2 px-2 drop-shadow-[0_0_4px_var(--notice-shadow)] rounded-lg">
             {keyFrameList?.map((frame) => {
